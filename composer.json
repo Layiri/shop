@@ -1,6 +1,6 @@
 {
-    "name": "layiri/gog",
-    "description": "Test for GOG",
+    "name": "layiri/shop",
+    "description": "Shopping site",
     "require-dev": {
         "phpunit/phpunit": "^9.5"
     },

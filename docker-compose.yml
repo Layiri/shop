@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+
+  php:
+    build:
+      args:
+        uid: "${USID}"
+      context: .
+      dockerfile: php.dockerfile
+    container_name: shop_php
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/conf.d/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./docker/php/conf.d/opcache.ini:/usr/local/etc/php/conf.d/opcache.ini
+    ports:
+      - "9000:9000"
+    environment:
+      XDEBUG_CONFIG: "remote_host=192.168.220.1 remote_enable=1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    depends_on:
+      - mariadb
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    container_name: shop_nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - php
+      - mariadb
+    networks:
+      - app-network
+
+  mariadb:
+    build:
+      context: .
+      dockerfile: mariadb.dockerfile
+    container_name: shop_mariadb
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3308:3308"
+    environment:
+      MYSQL_DATABASE: shop
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mariadb
+    volumes:
+      - /var/lib/mysql/
+    networks:
+      - app-network
+
+
+  composer:
+    build:
+      context: .
+      dockerfile: php.dockerfile
+    container_name: shop_composer
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - php
+    working_dir: /var/www/html
+    user: shop
+    entrypoint: [ 'composer', '--ignore-platform-reqs' ]
+    networks:
+      - app-network
+
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.10.0.0/16

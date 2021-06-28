@@ -15,5 +15,7 @@
             "App\\": "app/"
         }
     },
-    "require": {}
+    "require": {
+        "respect/validation": "^2.2"
+    }
 }

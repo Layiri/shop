@@ -6,16 +6,18 @@ use JetBrains\PhpStorm\ArrayShape;
 
 class Config
 {
-    #[ArrayShape(['db' => "string[]"])]
+    /**
+     * @return \string[][]
+     */
     public static function config(): array
     {
         return [
             'db' => [
-                'host' => 'localhost',
-                'port' => '3308',
-                'dbname' => 'gog',
+                'host' => 'mariadb',
+                'port' => '3306',
+                'dbname' => 'shop',
                 'username' => 'root',
-                'password' => '',
+                'password' => 'secret',
                 'charset' => 'utf8',
             ],
         ];

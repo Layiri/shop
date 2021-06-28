@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - "3308:3308"
+      - "3308:3306"
     environment:
       MYSQL_DATABASE: shop
       MYSQL_USER: root

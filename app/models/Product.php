@@ -12,7 +12,13 @@ use Respect\Validation\Validator as v;
 /**
  * Class Product
  *
- * @property
+ * @property int $id
+ * @property int $user_id
+ * @property string $title
+ * @property float $price
+ * @property int $status
+ * @property int $created_at
+ * @property int $updated_at
  *
  * @author Layiri Batiene
  * @package App\models

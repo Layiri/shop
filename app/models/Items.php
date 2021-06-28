@@ -8,17 +8,32 @@ use App\core\Model;
 use PDO;
 use Respect\Validation\Validator as v;
 
+/**
+ * Class Items
+ *
+ * @property int $user_id
+ * @property int $product_id
+ * @property int $order_id
+ * @property int $status
+ * @property int $statusChecker
+ * @property int $quantity
+ * @property int $created_at
+ * @property int $updated_at
+ *
+ * @author Layiri Batiene
+ */
+
 class Items extends Model implements IModel
 {
 
-    private int $user_id;
-    private int $product_id;
-    private int $order_id;
-    private int $status = self::ITEMS_ACTIVE;
-    private int $quantity;
-    private int $created_at;
-    private int $updated_at;
-    protected static PDO $conn;
+    protected int $user_id;
+    protected int $product_id;
+    protected int $order_id;
+    protected int $status;
+    protected int $statusChecker;
+    protected int $quantity;
+    protected int $created_at;
+    protected int $updated_at;
 
 
     const ITEMS_ACTIVE = 1;
@@ -112,6 +127,15 @@ class Items extends Model implements IModel
     }
 
     /**
+     * @param int $status
+     */
+    public function setStatusChecker(int $status): void
+    {
+        $this->statusChecker = $status;
+    }
+
+
+    /**
      * @return int
      */
     public function getQuantity(): int
@@ -179,7 +203,7 @@ class Items extends Model implements IModel
     public function update(): bool
     {
 
-        $req = self::$conn->prepare('UPDATE ' . self::table() . ' SET status=:status,quantity=:quantity,updated_at=:updated_at WHERE product_id=:product_id AND order_id=:order_id');
+        $req = self::$conn->prepare('UPDATE ' . self::table() . ' SET status=:status,quantity=:quantity,updated_at=:updated_at WHERE product_id=:product_id AND order_id=:order_id AND status=:checkstatus');
 
         $req->execute(array(
             'status' => $this->status,
@@ -187,6 +211,7 @@ class Items extends Model implements IModel
             'updated_at' => time(),
             'product_id' => $this->product_id,
             'order_id' => $this->order_id,
+            'checkstatus' => $this->statusChecker,
         ));
         return true;
     }
@@ -213,11 +238,10 @@ class Items extends Model implements IModel
      *
      * @return array
      */
-    public function all(): object
+    public function all(): array
     {
-
         $req = self::$conn->prepare('
-                SELECT pr.title AS name , (pr.price * it.quantity) AS total_price  
+                SELECT pr.id, pr.title AS name, it.quantity AS quantity, pr.price 
                 FROM ' . self::table() . ' AS it
                 LEFT JOIN ' . Product::table() . ' AS pr
                 ON it.product_id=pr.id
@@ -227,7 +251,7 @@ class Items extends Model implements IModel
             'order_id' => $this->order_id,
             'status' => self::ITEMS_ACTIVE,
         ]);
-        return $req->fetchObject();
+        return $req->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -274,6 +298,19 @@ class Items extends Model implements IModel
 
         return $req->rowCount();
     }
+
+    /**
+     * @return mixed
+     */
+    public function getAllByOrderID(): mixed
+    {
+        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE order_id=:order_id");
+        $req->execute([
+            'order_id' => $this->order_id,
+        ]);
+        return $req->fetchAll(PDO::FETCH_CLASS, Items::class);
+    }
+
 
 
 }

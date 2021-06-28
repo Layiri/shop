@@ -8,6 +8,20 @@ use App\core\Model;
 use PDO;
 use Respect\Validation\Validator as v;
 
+/**
+ * Class User
+ *
+ * @property int $id
+ * @property string $name;
+ * @property string $email;
+ * @property string $phone;
+ * @property string $token;
+ * @property int $created_at;
+ * @property int $updated_at;
+ *
+ * @author Layiri Batiene
+ * @package App\models
+ */
 class User extends Model implements IModel
 {
 
@@ -18,7 +32,6 @@ class User extends Model implements IModel
     protected string $token;
     protected int $created_at;
     protected int $updated_at;
-    protected static PDO $conn;
 
 
     /**
@@ -160,11 +173,10 @@ class User extends Model implements IModel
      * @param string $token
      * @return int
      */
-    public function ifExist(string $token): int
+    public function ifExist(): int
     {
-        $req = $this->conn->prepare("SELECT * FROM " . self::table() . " WHERE token=:token");
-        $req->execute(['token' => $token]);
-
+        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE id=:id");
+        $req->execute(['id' => $this->id]);
         return $req->rowCount();
     }
 
@@ -175,7 +187,7 @@ class User extends Model implements IModel
      */
     public function save(): bool
     {
-        $req = $this->conn->prepare('INSERT INTO ' . self::table() . '(name,email,phone,token,created_at,updated_at) VALUES(:name, :email, :phone, :token, :created_at, :updated_at)');
+        $req = self::$conn->prepare('INSERT INTO ' . self::table() . '(name,email,phone,token,created_at,updated_at) VALUES(:name, :email, :phone, :token, :created_at, :updated_at)');
         $req->execute(array(
             'name' => $this->name,
             'email' => $this->email,
@@ -193,7 +205,7 @@ class User extends Model implements IModel
      */
     public function update(): bool
     {
-        $req = $this->conn->prepare('UPDATE ' . self::table() . ' SET name=:name,email=:email,phone=:phone,token=:token,updated_at=:updated_at WHERE id=:id');
+        $req = self::$conn->prepare('UPDATE ' . self::table() . ' SET name=:name,email=:email,phone=:phone,token=:token,updated_at=:updated_at WHERE id=:id');
         $req->execute(array(
             'name' => $this->name,
             'email' => $this->email,
@@ -211,9 +223,8 @@ class User extends Model implements IModel
      */
     public function delete(): bool
     {
-        $req = $this->conn->prepare("DELETE FROM " . self::table() . " WHERE id=?");
+        $req = self::$conn->prepare("DELETE FROM " . self::table() . " WHERE id=?");
         $req->execute(array($this->id));
-
         return true;
     }
 
@@ -222,7 +233,7 @@ class User extends Model implements IModel
      */
     public function all(): mixed
     {
-        $req = $this->conn->prepare('SELECT *  FROM ' . self::table());
+        $req = self::$conn->prepare('SELECT *  FROM ' . self::table());
         $req->execute();
         return $req->fetchAll(PDO::FETCH_CLASS);
     }
@@ -233,9 +244,8 @@ class User extends Model implements IModel
      */
     public function one(): mixed
     {
-        $req = $this->conn->prepare("SELECT * FROM " . self::table() . " WHERE id=:id");
+        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE id=:id");
         $req->execute(['id' => $this->id]);
-
         return $req->fetch(PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE);
     }
 

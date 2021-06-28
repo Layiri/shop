@@ -7,55 +7,44 @@ use App\controllers\MigrationController;
 use App\core\Dispatcher;
 
 
-
 (new Dispatcher())
     ->routing('POST /api/product/add', function () {
         (new ProductController())->addAction();
     })
-    ->dispatch();
-
-(new Dispatcher())
     ->routing('GET /api/product/list-product', function ($params) {
         (new ProductController())->listProductsAction($params);
     })
-    ->dispatch();
-
-(new Dispatcher())
     ->routing('GET /api/product/remove', function ($params) {
         (new ProductController())->removeAction($params);
     })
-    ->dispatch();
-
-(new Dispatcher())
     ->routing('POST /api/product/update', function () {
         (new ProductController())->updateAction();
     })
     ->dispatch();
 
 
-
-//(new Dispatcher())
-//    ->routing('/api/cart/add-product', function () {
-//        (new CartController())->addProductAction();
-//    })
-//    ->routing('/api/cart/create', function () {
-//        (new CartController())->createAction();
-//    })
-//    ->routing('/api/cart/list-products/user{id}', function ($params) {
-//        (new CartController())->removeAction($params);
-//    })
-//    ->routing('/api/cart/update', function ($params) {
-//        (new CartController())->updateAction($params);
-//    })
-//    ->dispatch();
+(new Dispatcher())
+    ->routing('GET /api/cart/add-products', function ($params) {
+        (new CartController())->addProductAction($params);
+    })
+    ->routing('GET /api/cart/create', function ($params) {
+        (new CartController())->createCartAction($params);
+    })
+    ->routing('GET /api/cart/remove', function ($params) {
+        (new CartController())->removeCartAction($params);
+    })
+    ->routing('GET /api/cart/remove-products', function ($params) {
+        (new CartController())->removeProductAction($params);
+    })
+    ->routing('GET /api/cart/list-products', function ($params) {
+        (new CartController())->listProductsAction($params);
+    })
+    ->dispatch();
 
 (new Dispatcher())
     ->routing('GET /migrations/migrate', function () {
         (new MigrationController())->up();
     })
-    ->dispatch();
-
-(new Dispatcher())
     ->routing('GET /migrations/down', function () {
         (new MigrationController())->down();
     })

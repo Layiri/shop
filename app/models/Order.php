@@ -9,16 +9,28 @@ use App\core\Model;
 use PDO;
 use Respect\Validation\Validator as v;
 
+/**
+ * Class Order
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property float $total_price
+ * @property int $payment_status
+ * @property int $created_at
+ * @property int $updated_at
+ * @property PDO $conn
+ *
+ * @author Layiri Batiene
+ */
 class Order extends Model implements IModel
 {
 
     protected int $id;
-    private int $user_id;
-    private ?float $total_price = 0.0;
-    private int $payment_status;
-    private int $created_at;
-    private int $updated_at;
-    protected static PDO $conn;
+    protected int $user_id;
+    protected ?float $total_price = 0.0;
+    protected int $payment_status;
+    protected int $created_at;
+    protected int $updated_at;
 
     const PAYMENT_STATUS_ACTIVE = 1;
     const PAYMENT_STATUS_DISABLE = 0;
@@ -107,7 +119,11 @@ class Order extends Model implements IModel
      */
     public function setPaymentStatus(int $status = self::PAYMENT_STATUS_ACTIVE): void
     {
-        $this->payment_status = $status;
+        if ($status) {
+            $this->payment_status = self::PAYMENT_STATUS_ACTIVE;
+        } else {
+            $this->payment_status = self::PAYMENT_STATUS_DISABLE;
+        }
     }
 
     /**
@@ -140,6 +156,11 @@ class Order extends Model implements IModel
     public function getUpdatedAt(): string
     {
         return date('Y-m-d H:i:s', $this->updated_at);
+    }
+
+    public function getDb()
+    {
+        return self::$conn;
     }
 
 
@@ -184,7 +205,7 @@ class Order extends Model implements IModel
      * Update user
      * @return bool
      */
-    public function disable(): bool
+    public function delete(): bool
     {
         $req = self::$conn->prepare('UPDATE ' . self::table() . ' SET payment_status=:payment_status,updated_at=:updated_at WHERE id=:id');
         $req->execute(array(
@@ -195,15 +216,6 @@ class Order extends Model implements IModel
         return true;
     }
 
-    /**
-     * Delete element
-     * @return bool
-     */
-    public function delete(): bool
-    {
-        $req = self::$conn->prepare("DELETE FROM " . self::table() . " WHERE id=?");
-        return $req->execute(array($this->id)) ? true : false;
-    }
 
     /**
      * Get all products
@@ -222,8 +234,11 @@ class Order extends Model implements IModel
      */
     public function one(): mixed
     {
-        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE id=:id");
-        $req->execute(['id' => $this->id]);
+        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE id=:id AND payment_status=:payment_status");
+        $req->execute([
+            'id' => $this->id,
+            'payment_status' => $this->payment_status,
+        ]);
         return $req->fetch(PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE);
     }
 
@@ -232,12 +247,12 @@ class Order extends Model implements IModel
      */
     public function findActiveOrder(): mixed
     {
-        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE user_id=:user_id");
+        $req = self::$conn->prepare("SELECT * FROM " . self::table() . " WHERE user_id=:user_id AND payment_status=:payment_status");
         $req->execute([
-            'user_id' => $this->user_id
+            'user_id' => $this->user_id,
+            'payment_status' => self::PAYMENT_STATUS_ACTIVE
         ]);
         return $req->fetchObject();
-
     }
 
 }

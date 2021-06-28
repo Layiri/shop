@@ -61,7 +61,7 @@ class MigrationController extends BaseController
                 `product_id` INT(11) NOT NULL,
                 `order_id` INT(11) NOT NULL,
                 `status` TINYINT(1) DEFAULT 0,
-                `quantity` INT(11) NOT NULL,
+                `quantity` INT(11) DEFAULT 0,
                 `created_at` INT(11) NOT NULL,
                 `updated_at` INT(11) NOT NULL, 
     

@@ -3,36 +3,31 @@
 
 use App\controllers\api\CartController;
 use App\controllers\api\ProductController;
+use App\controllers\MigrationController;
 use App\core\Dispatcher;
-//var_dump($pattern);
-//var_dump($action);
-//die;
 
 
 
 (new Dispatcher())
-    ->routing('GET /api/product/list-product?papa=', function ($params) {
-        (new ProductController())->listProductsAction($params);
-    })
-    ->routing('/api/product/add', function () {
+    ->routing('POST /api/product/add', function () {
         (new ProductController())->addAction();
     })
     ->dispatch();
 
 (new Dispatcher())
-    ->routing('GET /api/product/list-product/{aa}', function ($params) {
+    ->routing('GET /api/product/list-product', function ($params) {
         (new ProductController())->listProductsAction($params);
     })
     ->dispatch();
 
 (new Dispatcher())
-    ->routing('/api/product/remove', function ($params) {
+    ->routing('GET /api/product/remove', function ($params) {
         (new ProductController())->removeAction($params);
     })
     ->dispatch();
 
 (new Dispatcher())
-    ->routing('/api/product/update', function () {
+    ->routing('POST /api/product/update', function () {
         (new ProductController())->updateAction();
     })
     ->dispatch();
@@ -56,6 +51,12 @@ use App\core\Dispatcher;
 
 (new Dispatcher())
     ->routing('GET /migrations/migrate', function () {
-        (new \App\controllers\MigrationController())->up();
+        (new MigrationController())->up();
+    })
+    ->dispatch();
+
+(new Dispatcher())
+    ->routing('GET /migrations/down', function () {
+        (new MigrationController())->down();
     })
     ->dispatch();
